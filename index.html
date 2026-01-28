@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            color: #333;
+        }
+
+        .timer-container {
+            text-align: center;
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        #startBtn {
+            background-color: #28a745;
+        }
+
+        #startBtn:hover {
+            background-color: #218838;
+        }
+
+        #stopBtn {
+            background-color: #dc3545;
+        }
+
+        #stopBtn:hover {
+            background-color: #c82333;
+        }
+
+        #resetBtn {
+            background-color: #007bff;
+        }
+
+        #resetBtn:hover {
+            background-color: #0056b3;
+        }
+
+        #setBtn {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        #setBtn:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="timer-container">
+        <h1>Stopwatch Timer</h1>
+        <div id="display">00:00:00</div>
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="stopBtn">Stop</button>
+            <button id="setBtn">Set</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let timer;
+        let isRunning = false;
+        let startTime;
+        let elapsedTime = 0;
+        let setTime = 0;
+
+        const display = document.getElementById('display');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const setBtn = document.getElementById('setBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            const pad = (num) => String(num).padStart(2, '0');
+            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        function updateDisplay() {
+            if (setTime > 0) {
+                // Countdown logic
+                const remainingTime = setTime - elapsedTime;
+                if (remainingTime <= 0) {
+                    stopTimer();
+                    display.innerHTML = "00:00:00";
+                    alert("Time's up!");
+                } else {
+                    display.innerHTML = formatTime(remainingTime);
+                }
+            } else {
+                // Stopwatch logic
+                display.innerHTML = formatTime(elapsedTime);
+            }
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = Date.now() - (setTime > 0 ? (setTime - elapsedTime) : elapsedTime);
+                timer = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    updateDisplay();
+                }, 1000);
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            }
+        }
+
+        function stopTimer() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timer);
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        function setTimer() {
+            const input = prompt("Enter time in HH:MM:SS format:", "00:05:00");
+            if (input) {
+                const parts = input.split(':');
+                if (parts.length === 3) {
+                    const hours = parseInt(parts[0], 10) || 0;
+                    const minutes = parseInt(parts[1], 10) || 0;
+                    const seconds = parseInt(parts[2], 10) || 0;
+                    setTime = (hours * 3600 + minutes * 60 + seconds) * 1000;
+                    elapsedTime = 0;
+                    stopTimer();
+                    updateDisplay();
+                } else {
+                    alert("Invalid format. Please use HH:MM:SS.");
+                }
+            }
+        }
+
+        function resetTimer() {
+            stopTimer();
+            elapsedTime = 0;
+            setTime = 0;
+            updateDisplay();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', stopTimer);
+        setBtn.addEventListener('click', setTimer);
+        resetBtn.addEventListener('click', resetTimer);
+    </script>
+
+</body>
+</html>
